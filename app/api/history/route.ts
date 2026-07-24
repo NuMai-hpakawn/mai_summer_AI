@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       .from(planHistory)
       .where(eq(planHistory.nameKey, parsedName.key))
       .orderBy(desc(planHistory.createdAt), desc(planHistory.id))
-      .limit(12);
+      .limit(5);
     return Response.json({ history });
   } catch (error) {
     return errorResponse(error);

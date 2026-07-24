@@ -13,6 +13,9 @@ test("defines the fitness planner, history chart, and coach interface", async ()
   assert.match(page, /Used to save and find your plan history/);
   assert.match(page, /03 \/ Your history/);
   assert.match(page, /Save this plan/);
+  assert.match(page, /The latest 5 saved plans/);
+  assert.match(page, /showSavePopup/);
+  assert.match(page, /Your plan was added to/);
   assert.match(page, /history-bar-track/);
   assert.match(page, /04 \/ Ask the coach/);
   assert.match(page, /Conversation with JUNIOUS Coach/);
@@ -49,6 +52,7 @@ test("uses server-side D1 persistence for plan history", async () => {
   assert.match(historyRoute, /getDb\(\)/);
   assert.match(historyRoute, /\.insert\(planHistory\)/);
   assert.match(historyRoute, /\.where\(eq\(planHistory\.nameKey/);
+  assert.match(historyRoute, /\.limit\(5\)/);
   assert.match(schema, /sqliteTable\(\s*"plan_history"/);
   assert.match(hosting, /"d1": "DB"/);
 });

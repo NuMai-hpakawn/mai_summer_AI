@@ -293,7 +293,7 @@ export default function Home() {
   const [profile, setProfile] = useState(initialProfile);
   const [userName, setUserName] = useState("");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [historyStatus, setHistoryStatus] = useState("");
+  const [showSavePopup, setShowSavePopup] = useState(false);
   const [historyError, setHistoryError] = useState("");
   const [isSavingPlan, setIsSavingPlan] = useState(false);
   const [activeDay, setActiveDay] = useState(0);
@@ -314,6 +314,13 @@ export default function Home() {
   const chartHistory = useMemo(() => [...history].reverse(), [history]);
   const selectedDay = plan.days[Math.min(activeDay, plan.days.length - 1)];
   const lastTracedPlan = useRef("");
+
+  useEffect(() => {
+    if (!showSavePopup) return;
+
+    const timeout = window.setTimeout(() => setShowSavePopup(false), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [showSavePopup]);
 
   useEffect(() => {
     const readinessBand =
@@ -411,7 +418,7 @@ export default function Home() {
 
   function updateUserName(value: string) {
     setUserName(value);
-    setHistoryStatus("");
+    setShowSavePopup(false);
     setHistoryError("");
     if (value.trim().length < 2) setHistory([]);
   }
@@ -422,7 +429,7 @@ export default function Home() {
 
     setIsSavingPlan(true);
     setHistoryError("");
-    setHistoryStatus("");
+    setShowSavePopup(false);
     try {
       const response = await fetch("/api/history", {
         method: "POST",
@@ -442,11 +449,13 @@ export default function Home() {
       if (!response.ok || !payload.entry) {
         throw new Error(payload.error ?? "Could not save this plan.");
       }
-      setHistory((current) => [
-        payload.entry as HistoryEntry,
-        ...current.filter((entry) => entry.id !== payload.entry?.id),
-      ].slice(0, 12));
-      setHistoryStatus(`Saved for ${payload.entry.userName}.`);
+      setHistory((current) =>
+        [
+          payload.entry as HistoryEntry,
+          ...current.filter((entry) => entry.id !== payload.entry?.id),
+        ].slice(0, 5),
+      );
+      setShowSavePopup(true);
     } catch (error) {
       setHistoryError(
         error instanceof Error ? error.message : "Could not save this plan.",
@@ -724,11 +733,6 @@ export default function Home() {
             >
               {isSavingPlan ? "Saving…" : "Save this plan"}
             </button>
-            {historyStatus && (
-              <p className="save-status" role="status">
-                {historyStatus}
-              </p>
-            )}
           </aside>
         </div>
       </section>
@@ -789,7 +793,7 @@ export default function Home() {
               ? `${userName.trim()}’s readiness over time.`
               : "Save a plan. See your progress take shape."}
           </h2>
-          <p>The latest 12 saved plans appear here automatically.</p>
+          <p>The latest 5 saved plans appear here automatically.</p>
         </div>
 
         {historyError && (
@@ -952,6 +956,25 @@ export default function Home() {
         <p>Train with intent. Recover on purpose.</p>
         <a href="#planner">Rebuild my week ↑</a>
       </footer>
+
+      {showSavePopup && (
+        <div className="save-popup" role="status" aria-live="polite">
+          <span className="save-popup-icon" aria-hidden="true">
+            ✓
+          </span>
+          <div>
+            <strong>Saved</strong>
+            <p>Your plan was added to {userName.trim()}’s history.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowSavePopup(false)}
+            aria-label="Close saved message"
+          >
+            ×
+          </button>
+        </div>
+      )}
     </main>
   );
 }

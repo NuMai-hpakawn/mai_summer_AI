@@ -447,11 +447,55 @@ legend {
   opacity: 0.45;
 }
 
-.save-status {
-  color: var(--lime);
-  font-size: 0.72rem;
-  margin: 12px 0 0;
-  text-align: center;
+.save-popup {
+  align-items: center;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  bottom: 24px;
+  box-shadow: 8px 8px 0 var(--lime);
+  color: var(--ink);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: auto 1fr auto;
+  max-width: min(420px, calc(100vw - 40px));
+  padding: 16px 18px;
+  position: fixed;
+  right: 24px;
+  z-index: 100;
+}
+
+.save-popup-icon {
+  align-items: center;
+  background: var(--lime);
+  border-radius: 50%;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.save-popup strong {
+  display: block;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.save-popup p {
+  font-size: 0.75rem;
+  margin: 3px 0 0;
+}
+
+.save-popup button {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: 4px;
 }
 
 .schedule {
