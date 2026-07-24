@@ -2,28 +2,26 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("defines the fitness planner, history chart, and coach interface", async () => {
-  const [page, layout] = await Promise.all([
+test("defines the fitness planner, history chart, coach, and languages", async () => {
+  const [page, layout, i18n] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/i18n.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(layout, /title: "JUNIOUS — Your Personal Gym Plan"/);
-  assert.match(page, /Tell us what your week looks like/);
-  assert.match(page, /Focused days/);
-  assert.match(page, /Choose exactly how many days you want to train/);
+  assert.match(page, /languageOptions/);
+  assert.match(page, /changeLanguage/);
+  assert.match(page, /translateTerm/);
   assert.match(page, /aria-pressed=\{profile\.availableDays === days\}/);
-  assert.match(page, /Used to save and find your plan history/);
-  assert.match(page, /03 \/ Your history/);
-  assert.match(page, /Save this plan/);
-  assert.match(page, /The latest 5 saved plans/);
   assert.match(page, /showSavePopup/);
-  assert.match(page, /Your plan was added to/);
   assert.match(page, /history-bar-track/);
-  assert.match(page, /04 \/ Ask the coach/);
-  assert.match(page, /Conversation with JUNIOUS Coach/);
-  assert.match(page, /How should I warm up before leg day\?/);
-  assert.match(page, /General fitness guidance only/);
+  assert.match(i18n, /English/);
+  assert.match(i18n, /한국어/);
+  assert.match(i18n, /日本語/);
+  assert.match(i18n, /中文/);
+  assert.match(i18n, /The latest 5 saved plans/);
+  assert.match(i18n, /최근 저장한 계획 5개/);
   assert.doesNotMatch(page, /sk-or-v1-|OPENROUTER_API_KEY/);
 });
 
@@ -35,6 +33,7 @@ test("keeps OpenRouter credentials on the server", async () => {
   ]);
 
   assert.match(page, /fetch\("\/api\/chat"/);
+  assert.match(page, /language,/);
   assert.doesNotMatch(page, /OPENROUTER_API_KEY|sk-or-v1-/);
   assert.match(chatRoute, /process\.env\.OPENROUTER_API_KEY/);
   assert.match(
@@ -42,6 +41,8 @@ test("keeps OpenRouter credentials on the server", async () => {
     /https:\/\/openrouter\.ai\/api\/v1\/chat\/completions/,
   );
   assert.match(chatRoute, /Authorization: `Bearer \$\{apiKey\}`/);
+  assert.match(chatRoute, /Respond in Korean/);
+  assert.match(chatRoute, /languageInstructions\[language\]/);
   assert.match(envExample, /OPENROUTER_API_KEY=sk-or-v1-your-api-key/);
 });
 

@@ -39,6 +39,16 @@ a {
   text-decoration: none;
 }
 
+.sr-only {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
 .nav-shell {
   align-items: center;
   border-bottom: 1px solid var(--line);
@@ -75,6 +85,23 @@ a {
 .nav-meta a {
   border-bottom: 1px solid;
   padding-bottom: 4px;
+}
+
+.language-picker select {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  color: var(--paper);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-height: 36px;
+  padding: 0 28px 0 10px;
+}
+
+.language-picker select:focus-visible {
+  outline: 3px solid #7dab2c;
+  outline-offset: 2px;
 }
 
 .hero {

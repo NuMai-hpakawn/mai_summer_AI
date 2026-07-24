@@ -9,6 +9,8 @@ type ChatMessage = {
   content: string;
 };
 
+type ChatLanguage = "en" | "ko" | "ja" | "zh";
+
 type OpenRouterResponse = {
   model?: string;
   choices?: Array<{
@@ -32,6 +34,13 @@ recovery, and general nutrition habits. Prefer practical steps and short answers
 Do not diagnose injuries or medical conditions. If a user describes severe pain,
 chest pain, fainting, breathing difficulty, or another urgent symptom, tell them
 to stop training and seek qualified medical help.`;
+
+const languageInstructions: Record<ChatLanguage, string> = {
+  en: "Respond in English.",
+  ko: "Respond in Korean.",
+  ja: "Respond in Japanese.",
+  zh: "Respond in Simplified Chinese.",
+};
 
 function parseMessages(value: unknown): ChatMessage[] | null {
   if (!Array.isArray(value) || value.length === 0 || value.length > 12) {
@@ -79,7 +88,10 @@ function parseSessionId(value: unknown): string | null {
   return value;
 }
 
-async function requestOpenRouter(messages: ChatMessage[]) {
+async function requestOpenRouter(
+  messages: ChatMessage[],
+  language: ChatLanguage,
+) {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is not configured");
@@ -99,7 +111,10 @@ async function requestOpenRouter(messages: ChatMessage[]) {
       body: JSON.stringify({
         model: requestedModel,
         messages: [
-          { role: "system", content: systemPrompt },
+          {
+            role: "system",
+            content: `${systemPrompt}\n${languageInstructions[language]}`,
+          },
           ...messages,
         ],
         temperature: 0.5,
@@ -136,11 +151,17 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     messages?: unknown;
     sessionId?: unknown;
+    language?: unknown;
   } | null;
   const messages = parseMessages(body?.messages);
   const sessionId = parseSessionId(body?.sessionId);
+  const language = ["en", "ko", "ja", "zh"].includes(
+    String(body?.language ?? ""),
+  )
+    ? (body?.language as ChatLanguage)
+    : null;
 
-  if (!messages || !sessionId) {
+  if (!messages || !sessionId || !language) {
     return Response.json({ error: "Invalid chat request" }, { status: 400 });
   }
 
@@ -159,6 +180,7 @@ export async function POST(request: Request) {
               feature: "fitness-chat",
               source: "web",
               historyLength: messages.length,
+              language,
             },
           },
           async () =>
@@ -174,7 +196,10 @@ export async function POST(request: Request) {
                       process.env.OPENROUTER_MODEL ?? "openrouter/free";
                     generation.update({
                       input: [
-                        { role: "system", content: systemPrompt },
+                        {
+                          role: "system",
+                          content: `${systemPrompt}\n${languageInstructions[language]}`,
+                        },
                         ...messages,
                       ],
                       model: requestedModel,
@@ -185,7 +210,7 @@ export async function POST(request: Request) {
                       },
                     });
 
-                    const output = await requestOpenRouter(messages);
+                    const output = await requestOpenRouter(messages, language);
                     generation.update({
                       output: {
                         role: "assistant",
@@ -208,7 +233,7 @@ export async function POST(request: Request) {
               },
             ),
         )
-      : await requestOpenRouter(messages);
+      : await requestOpenRouter(messages, language);
 
     if (runtime) await runtime.processor.forceFlush();
 

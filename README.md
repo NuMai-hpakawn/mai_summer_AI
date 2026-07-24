@@ -71,3 +71,6 @@ personal demo; add authentication before using it for private multi-user data.
 
 Users can choose 2–5 focused training days, and the weekly workout split updates
 immediately to match that choice.
+
+The interface supports English, Korean, Japanese, and Simplified Chinese. The
+language selector also tells JUNIOUS Coach which language to use in its answer.
