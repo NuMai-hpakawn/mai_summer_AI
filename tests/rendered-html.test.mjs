@@ -13,6 +13,7 @@ test("defines the fitness planner, history chart, coach, and languages", async (
   assert.match(page, /languageOptions/);
   assert.match(page, /changeLanguage/);
   assert.match(page, /translateTerm/);
+  assert.doesNotMatch(page, /\bcopy\.(goal|experience)\b/);
   assert.match(page, /aria-pressed=\{profile\.availableDays === days\}/);
   assert.match(page, /showSavePopup/);
   assert.match(page, /history-bar-track/);

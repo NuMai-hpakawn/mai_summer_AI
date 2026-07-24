@@ -594,7 +594,7 @@ export default function Home() {
             <fieldset>
               <legend>{ui.primaryGoal}</legend>
               <div className="segment four">
-                {(Object.keys(copy.goal) as Goal[]).map((goal) => (
+                {(Object.keys(ui.goals) as Goal[]).map((goal) => (
                   <button
                     type="button"
                     className={profile.goal === goal ? "selected" : ""}
@@ -610,7 +610,7 @@ export default function Home() {
             <fieldset>
               <legend>{ui.experience}</legend>
               <div className="segment three">
-                {(Object.keys(copy.experience) as Experience[]).map(
+                {(Object.keys(ui.experiences) as Experience[]).map(
                   (experience) => (
                     <button
                       type="button"
