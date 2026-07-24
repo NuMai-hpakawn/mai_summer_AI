@@ -10,21 +10,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     metadataBase: base,
-    title: "Kinetic — Your Personal Gym Plan",
+    title: "JUNIOUS — Your Personal Gym Plan",
     description:
       "Turn your schedule, recovery, nutrition habits and training goal into a practical weekly gym plan.",
     openGraph: {
-      title: "KINETIC — A week that fits your body.",
+      title: "JUNIOUS — A week that fits your body.",
       description:
         "An explainable weekly gym plan shaped around your body and real life.",
-      images: [{ url: "/og.png", width: 1792, height: 933 }],
+      images: [{ url: "/og-junious.png", width: 1792, height: 933 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "KINETIC — A week that fits your body.",
+      title: "JUNIOUS — A week that fits your body.",
       description:
         "An explainable weekly gym plan shaped around your body and real life.",
-      images: ["/og.png"],
+      images: ["/og-junious.png"],
     },
   };
 }

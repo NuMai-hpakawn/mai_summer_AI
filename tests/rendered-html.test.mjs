@@ -29,10 +29,10 @@ test("server-renders the fitness planner and coach", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Kinetic — Your Personal Gym Plan<\/title>/i);
+  assert.match(html, /<title>JUNIOUS — Your Personal Gym Plan<\/title>/i);
   assert.match(html, /Tell us what your week looks like/);
   assert.match(html, /03 \/ Ask the coach/);
-  assert.match(html, /aria-label="Conversation with Kinetic Coach"/);
+  assert.match(html, /aria-label="Conversation with JUNIOUS Coach"/);
   assert.match(html, /How should I warm up before leg day\?/);
   assert.match(html, /General fitness guidance only/);
   assert.doesNotMatch(html, /sk-or-v1-|OPENROUTER_API_KEY/);

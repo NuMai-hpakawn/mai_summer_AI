@@ -286,7 +286,7 @@ export default function Home() {
     {
       role: "assistant",
       content:
-        "Hi, I’m Kinetic Coach. Ask me about exercises, your weekly split, recovery, or gym nutrition.",
+        "Hi, I’m JUNIOUS Coach. Ask me about exercises, your weekly split, recovery, or gym nutrition.",
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -411,8 +411,8 @@ export default function Home() {
   return (
     <main>
       <nav className="nav-shell" aria-label="Primary navigation">
-        <a className="brand" href="#top" aria-label="Kinetic home">
-          KINETIC<span>.</span>
+        <a className="brand" href="#top" aria-label="JUNIOUS home">
+          JUNIOUS<span>.</span>
         </a>
         <div className="nav-meta">
           <span>Personal training analysis</span>
@@ -665,7 +665,7 @@ export default function Home() {
           <div
             className="chat-messages"
             aria-live="polite"
-            aria-label="Conversation with Kinetic Coach"
+            aria-label="Conversation with JUNIOUS Coach"
           >
             {chatMessages.map((message, index) => (
               <div className={`chat-message ${message.role}`} key={index}>
@@ -751,7 +751,7 @@ export default function Home() {
         <div className="safety-note">
           <strong>Scope note</strong>
           <p>
-            Kinetic is an educational planning tool, not medical advice. Stop
+            JUNIOUS is an educational planning tool, not medical advice. Stop
             if an exercise causes pain, and consult a qualified clinician or
             coach for injuries, pregnancy, chronic conditions, or eating
             concerns.
@@ -761,7 +761,7 @@ export default function Home() {
 
       <footer>
         <a className="brand" href="#top">
-          KINETIC<span>.</span>
+          JUNIOUS<span>.</span>
         </a>
         <p>Train with intent. Recover on purpose.</p>
         <a href="#planner">Rebuild my week ↑</a>

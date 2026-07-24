@@ -26,7 +26,7 @@ type OpenRouterResponse = {
   };
 };
 
-const systemPrompt = `You are Kinetic Coach, a concise and supportive gym assistant.
+const systemPrompt = `You are JUNIOUS Coach, a concise and supportive gym assistant.
 Answer questions about exercise selection, weekly training schedules, technique,
 recovery, and general nutrition habits. Prefer practical steps and short answers.
 Do not diagnose injuries or medical conditions. If a user describes severe pain,
@@ -94,7 +94,7 @@ async function requestOpenRouter(messages: ChatMessage[]) {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://kinetic-fitness-plan.workspace-856676.chatgpt.site",
-        "X-Title": "Kinetic Fitness Planner",
+        "X-Title": "JUNIOUS Fitness Planner",
       },
       body: JSON.stringify({
         model: requestedModel,

@@ -1,6 +1,6 @@
-# Kinetic Fitness Planner
+# JUNIOUS Fitness Planner
 
-Kinetic turns a person’s training goal, availability, experience, recovery,
+JUNIOUS turns a person’s training goal, availability, experience, recovery,
 nutrition habits, and daily movement into an explainable weekly gym plan.
 
 ## Run locally
