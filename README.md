@@ -61,3 +61,10 @@ OPENROUTER_MODEL=openrouter/free
 Each chat turn is recorded as an `answer-fitness-question` trace containing a
 `generate-fitness-answer` generation with the selected model and token usage.
 Related turns share an anonymous browser-session ID.
+
+## Saved plan history
+
+Enter a name in the planner and choose **Save this plan** to store a snapshot in
+Cloudflare D1. JUNIOUS loads the latest 12 entries for that name and plots
+readiness as a bar chart. This lightweight name lookup is intended for a
+personal demo; add authentication before using it for private multi-user data.

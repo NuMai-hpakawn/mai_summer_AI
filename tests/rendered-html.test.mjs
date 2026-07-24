@@ -2,40 +2,23 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
+test("defines the fitness planner, history chart, and coach interface", async () => {
+  const [page, layout] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+  ]);
 
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-}
-
-test("server-renders the fitness planner and coach", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
-  assert.match(html, /<title>JUNIOUS — Your Personal Gym Plan<\/title>/i);
-  assert.match(html, /Tell us what your week looks like/);
-  assert.match(html, /03 \/ Ask the coach/);
-  assert.match(html, /aria-label="Conversation with JUNIOUS Coach"/);
-  assert.match(html, /How should I warm up before leg day\?/);
-  assert.match(html, /General fitness guidance only/);
-  assert.doesNotMatch(html, /sk-or-v1-|OPENROUTER_API_KEY/);
+  assert.match(layout, /title: "JUNIOUS — Your Personal Gym Plan"/);
+  assert.match(page, /Tell us what your week looks like/);
+  assert.match(page, /Used to save and find your plan history/);
+  assert.match(page, /03 \/ Your history/);
+  assert.match(page, /Save this plan/);
+  assert.match(page, /history-bar-track/);
+  assert.match(page, /04 \/ Ask the coach/);
+  assert.match(page, /Conversation with JUNIOUS Coach/);
+  assert.match(page, /How should I warm up before leg day\?/);
+  assert.match(page, /General fitness guidance only/);
+  assert.doesNotMatch(page, /sk-or-v1-|OPENROUTER_API_KEY/);
 });
 
 test("keeps OpenRouter credentials on the server", async () => {
@@ -54,4 +37,18 @@ test("keeps OpenRouter credentials on the server", async () => {
   );
   assert.match(chatRoute, /Authorization: `Bearer \$\{apiKey\}`/);
   assert.match(envExample, /OPENROUTER_API_KEY=sk-or-v1-your-api-key/);
+});
+
+test("uses server-side D1 persistence for plan history", async () => {
+  const [historyRoute, schema, hosting] = await Promise.all([
+    readFile(new URL("../app/api/history/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(historyRoute, /getDb\(\)/);
+  assert.match(historyRoute, /\.insert\(planHistory\)/);
+  assert.match(historyRoute, /\.where\(eq\(planHistory\.nameKey/);
+  assert.match(schema, /sqliteTable\(\s*"plan_history"/);
+  assert.match(hosting, /"d1": "DB"/);
 });

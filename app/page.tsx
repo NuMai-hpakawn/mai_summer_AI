@@ -36,6 +36,16 @@ type ChatMessage = {
   content: string;
 };
 
+type HistoryEntry = {
+  id: number;
+  userName: string;
+  readiness: number;
+  trainingDays: number;
+  goal: Goal;
+  split: string;
+  createdAt: string;
+};
+
 const initialProfile: Profile = {
   goal: "muscle",
   experience: "beginner",
@@ -281,6 +291,11 @@ function NumberField({
 
 export default function Home() {
   const [profile, setProfile] = useState(initialProfile);
+  const [userName, setUserName] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [historyStatus, setHistoryStatus] = useState("");
+  const [historyError, setHistoryError] = useState("");
+  const [isSavingPlan, setIsSavingPlan] = useState(false);
   const [activeDay, setActiveDay] = useState(0);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -296,6 +311,7 @@ export default function Home() {
     `kinetic_${crypto.randomUUID().replaceAll("-", "")}`,
   );
   const plan = useMemo(() => buildPlan(profile), [profile]);
+  const chartHistory = useMemo(() => [...history].reverse(), [history]);
   const selectedDay = plan.days[Math.min(activeDay, plan.days.length - 1)];
   const lastTracedPlan = useRef("");
 
@@ -355,9 +371,89 @@ export default function Home() {
     };
   }, [plan, profile]);
 
+  useEffect(() => {
+    const name = userName.trim();
+    if (name.length < 2) return;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/history?name=${encodeURIComponent(name)}`,
+          { signal: controller.signal },
+        );
+        const payload = (await response.json()) as {
+          history?: HistoryEntry[];
+          error?: string;
+        };
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Could not load history.");
+        }
+        setHistory(payload.history ?? []);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setHistoryError(
+          error instanceof Error ? error.message : "Could not load history.",
+        );
+      }
+    }, 500);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [userName]);
+
   function update<K extends keyof Profile>(key: K, value: Profile[K]) {
     setProfile((current) => ({ ...current, [key]: value }));
     if (key === "availableDays" || key === "experience") setActiveDay(0);
+  }
+
+  function updateUserName(value: string) {
+    setUserName(value);
+    setHistoryStatus("");
+    setHistoryError("");
+    if (value.trim().length < 2) setHistory([]);
+  }
+
+  async function savePlan() {
+    const name = userName.trim();
+    if (name.length < 2 || isSavingPlan) return;
+
+    setIsSavingPlan(true);
+    setHistoryError("");
+    setHistoryStatus("");
+    try {
+      const response = await fetch("/api/history", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name,
+          readiness: plan.readiness,
+          trainingDays: plan.recommendedDays,
+          goal: profile.goal,
+          split: plan.days.map((day) => day.focus).join(" / "),
+        }),
+      });
+      const payload = (await response.json()) as {
+        entry?: HistoryEntry;
+        error?: string;
+      };
+      if (!response.ok || !payload.entry) {
+        throw new Error(payload.error ?? "Could not save this plan.");
+      }
+      setHistory((current) => [
+        payload.entry as HistoryEntry,
+        ...current.filter((entry) => entry.id !== payload.entry?.id),
+      ].slice(0, 12));
+      setHistoryStatus(`Saved for ${payload.entry.userName}.`);
+    } catch (error) {
+      setHistoryError(
+        error instanceof Error ? error.message : "Could not save this plan.",
+      );
+    } finally {
+      setIsSavingPlan(false);
+    }
   }
 
   async function sendChatMessage(event: React.FormEvent<HTMLFormElement>) {
@@ -455,6 +551,22 @@ export default function Home() {
 
         <div className="planner-grid">
           <form className="profile-form" onSubmit={(event) => event.preventDefault()}>
+            <fieldset>
+              <legend>Your profile</legend>
+              <label className="name-field">
+                <span>Name</span>
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(event) => updateUserName(event.target.value)}
+                  placeholder="Enter your name"
+                  maxLength={50}
+                  autoComplete="name"
+                />
+                <small>Used to save and find your plan history.</small>
+              </label>
+            </fieldset>
+
             <fieldset>
               <legend>Primary goal</legend>
               <div className="segment four">
@@ -604,6 +716,19 @@ export default function Home() {
               <span>Why this plan</span>
               <p>{plan.flags[0]}</p>
             </div>
+            <button
+              className="save-plan-button"
+              type="button"
+              onClick={savePlan}
+              disabled={userName.trim().length < 2 || isSavingPlan}
+            >
+              {isSavingPlan ? "Saving…" : "Save this plan"}
+            </button>
+            {historyStatus && (
+              <p className="save-status" role="status">
+                {historyStatus}
+              </p>
+            )}
           </aside>
         </div>
       </section>
@@ -656,9 +781,70 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="history" id="history">
+        <div className="section-heading">
+          <span>03 / Your history</span>
+          <h2>
+            {userName.trim()
+              ? `${userName.trim()}’s readiness over time.`
+              : "Save a plan. See your progress take shape."}
+          </h2>
+          <p>The latest 12 saved plans appear here automatically.</p>
+        </div>
+
+        {historyError && (
+          <p className="history-error" role="alert">
+            {historyError}
+          </p>
+        )}
+
+        {chartHistory.length > 0 ? (
+          <div className="history-panel">
+            <div
+              className="history-chart"
+              role="img"
+              aria-label={`Readiness history for ${userName.trim()}`}
+            >
+              {chartHistory.map((entry) => (
+                <div className="history-bar-column" key={entry.id}>
+                  <strong>{entry.readiness}</strong>
+                  <div className="history-bar-track">
+                    <span style={{ height: `${entry.readiness}%` }} />
+                  </div>
+                  <small>
+                    {new Date(`${entry.createdAt}Z`).toLocaleDateString(
+                      undefined,
+                      { month: "short", day: "numeric" },
+                    )}
+                  </small>
+                </div>
+              ))}
+            </div>
+            <div className="history-latest">
+              <span>Latest saved plan</span>
+              <strong>{history[0].trainingDays} training days</strong>
+              <p>{history[0].split}</p>
+              <small>{copy.goal[history[0].goal]}</small>
+            </div>
+          </div>
+        ) : (
+          <div className="history-empty">
+            <strong>
+              {userName.trim().length >= 2
+                ? "No saved plans yet."
+                : "Enter your name to load history."}
+            </strong>
+            <p>
+              Adjust your inputs, then use “Save this plan” in the readiness
+              card.
+            </p>
+          </div>
+        )}
+      </section>
+
       <section className="coach" id="coach">
         <div className="section-heading inverse">
-          <span>03 / Ask the coach</span>
+          <span>04 / Ask the coach</span>
           <h2>A simple answer when your next step is not obvious.</h2>
         </div>
         <div className="chat-shell">
@@ -714,7 +900,7 @@ export default function Home() {
 
       <section className="support">
         <div className="section-heading">
-          <span>04 / Support the work</span>
+          <span>05 / Support the work</span>
           <h2>Training is the signal. Recovery is the adaptation.</h2>
         </div>
         <div className="support-grid">

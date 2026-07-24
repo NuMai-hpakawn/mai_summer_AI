@@ -255,6 +255,41 @@ legend {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.name-field {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(90px, 0.35fr) minmax(220px, 1fr) minmax(180px, 0.8fr);
+  align-items: center;
+}
+
+.name-field > span {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.name-field input {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  color: var(--ink);
+  font-size: 1.35rem;
+  font-weight: 700;
+  outline: 0;
+  padding: 10px 2px;
+  width: 100%;
+}
+
+.name-field input:focus {
+  border-color: #7dab2c;
+}
+
+.name-field small {
+  color: #6c6c65;
+  line-height: 1.4;
+}
+
 .number-field {
   border-bottom: 1px solid var(--line);
   min-height: 112px;
@@ -393,6 +428,32 @@ legend {
   margin: 24px 0 0;
 }
 
+.save-plan-button {
+  background: var(--paper);
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-top: 18px;
+  min-height: 50px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.save-plan-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.save-status {
+  color: var(--lime);
+  font-size: 0.72rem;
+  margin: 12px 0 0;
+  text-align: center;
+}
+
 .schedule {
   background: var(--ink);
   color: var(--paper);
@@ -404,6 +465,119 @@ legend {
   border-top: 1px solid #484842;
   color: var(--paper);
   padding: 8vh 3vw 9vh;
+}
+
+.history {
+  border-top: 1px solid var(--line);
+  padding: 8vh 3vw 9vh;
+}
+
+.history-panel {
+  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--ink);
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 0.7fr);
+}
+
+.history-chart {
+  align-items: end;
+  display: flex;
+  gap: clamp(8px, 1.5vw, 22px);
+  min-height: 410px;
+  overflow-x: auto;
+  padding: 42px 3vw 28px 0;
+}
+
+.history-bar-column {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 44px;
+}
+
+.history-bar-column > strong {
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.history-bar-column > small {
+  color: #6c6c65;
+  font-size: 0.63rem;
+  margin-top: 9px;
+  white-space: nowrap;
+}
+
+.history-bar-track {
+  align-items: end;
+  background: #dedbd1;
+  display: flex;
+  height: 260px;
+  width: 100%;
+}
+
+.history-bar-track span {
+  background: var(--ink);
+  border-top: 5px solid var(--lime);
+  display: block;
+  min-height: 4px;
+  transition: height 300ms ease;
+  width: 100%;
+}
+
+.history-latest {
+  background: var(--lime);
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 30px;
+}
+
+.history-latest > span,
+.history-latest > small {
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.history-latest > strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 3.3vw, 3.8rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 26px 0;
+}
+
+.history-latest p {
+  border-top: 1px solid rgba(23, 23, 19, 0.35);
+  line-height: 1.5;
+  margin: 0 0 28px;
+  padding-top: 20px;
+}
+
+.history-empty {
+  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--ink);
+  min-height: 210px;
+  padding: 46px 0;
+}
+
+.history-empty strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+}
+
+.history-empty p,
+.history-error {
+  color: #676760;
+  line-height: 1.5;
+  max-width: 520px;
+}
+
+.history-error {
+  color: #a63221;
 }
 
 .chat-shell {
@@ -770,7 +944,8 @@ footer > a:last-child {
 
   .planner-grid,
   .workout-card,
-  .chat-shell {
+  .chat-shell,
+  .history-panel {
     grid-template-columns: 1fr;
   }
 
@@ -793,6 +968,14 @@ footer > a:last-child {
   .chat-messages {
     padding-right: 0;
   }
+
+  .history-chart {
+    padding-right: 0;
+  }
+
+  .history-latest {
+    min-height: 280px;
+  }
 }
 
 @media (max-width: 640px) {
@@ -802,6 +985,7 @@ footer > a:last-child {
   .support,
   .schedule,
   .coach,
+  .history,
   footer {
     padding-left: 20px;
     padding-right: 20px;
@@ -842,6 +1026,11 @@ footer > a:last-child {
   .segment.four,
   .segment.three {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .name-field {
+    align-items: start;
+    grid-template-columns: 1fr;
   }
 
   .number-grid {
