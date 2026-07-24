@@ -68,3 +68,6 @@ Enter a name in the planner and choose **Save this plan** to store a snapshot in
 Cloudflare D1. JUNIOUS loads the latest 5 entries for that name and plots
 readiness as a bar chart. This lightweight name lookup is intended for a
 personal demo; add authentication before using it for private multi-user data.
+
+Users can choose 2–5 focused training days, and the weekly workout split updates
+immediately to match that choice.

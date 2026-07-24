@@ -162,10 +162,7 @@ function buildPlan(profile: Profile) {
         : profile.experience === "advanced"
           ? 5
           : 4;
-  const recommendedDays = Math.max(
-    2,
-    Math.min(profile.availableDays, recoveryCap),
-  );
+  const recommendedDays = Math.max(2, Math.min(profile.availableDays, 5));
   const session = Math.max(35, Math.min(profile.sessionMinutes, 80));
 
   const templates: Record<
@@ -230,9 +227,9 @@ function buildPlan(profile: Profile) {
   if (profile.proteinMeals < 2) {
     flags.push("Add a protein-rich meal before adding more training volume.");
   }
-  if (profile.availableDays > recommendedDays) {
+  if (recommendedDays > recoveryCap) {
     flags.push(
-      `${profile.availableDays - recommendedDays} available day${profile.availableDays - recommendedDays > 1 ? "s" : ""} kept for recovery or light cardio.`,
+      `${recommendedDays} focused days is ambitious for your current recovery. Keep sessions controlled and reduce a day if performance drops.`,
     );
   }
   if (flags.length === 0) {
@@ -612,6 +609,30 @@ export default function Home() {
               </div>
             </fieldset>
 
+            <fieldset>
+              <legend>Focused days</legend>
+              <p className="field-help">
+                Choose exactly how many days you want to train each week.
+              </p>
+              <div
+                className="segment four focused-days"
+                aria-label="Focused training days per week"
+              >
+                {[2, 3, 4, 5].map((days) => (
+                  <button
+                    type="button"
+                    className={profile.availableDays === days ? "selected" : ""}
+                    onClick={() => update("availableDays", days)}
+                    aria-pressed={profile.availableDays === days}
+                    key={days}
+                  >
+                    <strong>{days}</strong>
+                    <span>days</span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
             <div className="number-grid">
               <NumberField
                 label="Age"
@@ -637,14 +658,6 @@ export default function Home() {
                 min={130}
                 max={230}
                 onChange={(value) => update("height", value)}
-              />
-              <NumberField
-                label="Days available"
-                value={profile.availableDays}
-                unit="/ week"
-                min={2}
-                max={5}
-                onChange={(value) => update("availableDays", value)}
               />
               <NumberField
                 label="Time per session"

@@ -10,6 +10,9 @@ test("defines the fitness planner, history chart, and coach interface", async ()
 
   assert.match(layout, /title: "JUNIOUS — Your Personal Gym Plan"/);
   assert.match(page, /Tell us what your week looks like/);
+  assert.match(page, /Focused days/);
+  assert.match(page, /Choose exactly how many days you want to train/);
+  assert.match(page, /aria-pressed=\{profile\.availableDays === days\}/);
   assert.match(page, /Used to save and find your plan history/);
   assert.match(page, /03 \/ Your history/);
   assert.match(page, /Save this plan/);
