@@ -24,7 +24,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -398,6 +399,139 @@ legend {
   padding: 8vh 3vw 9vh;
 }
 
+.coach {
+  background: var(--ink);
+  border-top: 1px solid #484842;
+  color: var(--paper);
+  padding: 8vh 3vw 9vh;
+}
+
+.chat-shell {
+  border-bottom: 1px solid #484842;
+  border-top: 1px solid #484842;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(330px, 0.8fr);
+}
+
+.chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 420px;
+  max-height: 620px;
+  overflow-y: auto;
+  padding: 32px 3vw 32px 0;
+}
+
+.chat-message {
+  max-width: min(680px, 88%);
+}
+
+.chat-message > span {
+  color: #98988f;
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  margin-bottom: 7px;
+  text-transform: uppercase;
+}
+
+.chat-message p {
+  background: #2a2a25;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 17px 20px;
+  white-space: pre-wrap;
+}
+
+.chat-message.user {
+  align-self: flex-end;
+}
+
+.chat-message.user > span {
+  text-align: right;
+}
+
+.chat-message.user p {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.chat-message.waiting p {
+  color: #b0b0a7;
+  font-style: italic;
+}
+
+.chat-form {
+  border-left: 1px solid #484842;
+  padding: 32px 0 32px 3vw;
+}
+
+.chat-form > label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.chat-form > div {
+  background: var(--paper);
+  padding: 18px;
+}
+
+.chat-form textarea {
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  display: block;
+  line-height: 1.45;
+  min-height: 132px;
+  outline: 0;
+  resize: vertical;
+  width: 100%;
+}
+
+.chat-form textarea:focus {
+  box-shadow: inset 0 -2px 0 #7dab2c;
+}
+
+.chat-form button {
+  background: var(--lime);
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  margin-top: 18px;
+  min-height: 50px;
+  padding: 0 20px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.chat-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.chat-hint,
+.chat-error {
+  color: #9f9f97;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  margin: 16px 0 0;
+}
+
+.chat-error {
+  color: #ffb0a4;
+}
+
 .section-heading.inverse {
   grid-template-columns: 1fr 4fr;
 }
@@ -635,7 +769,8 @@ footer > a:last-child {
   }
 
   .planner-grid,
-  .workout-card {
+  .workout-card,
+  .chat-shell {
     grid-template-columns: 1fr;
   }
 
@@ -648,6 +783,16 @@ footer > a:last-child {
     border-bottom: 1px solid #484842;
     border-right: 0;
   }
+
+  .chat-form {
+    border-left: 0;
+    border-top: 1px solid #484842;
+    padding-left: 0;
+  }
+
+  .chat-messages {
+    padding-right: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -656,6 +801,7 @@ footer > a:last-child {
   .planner,
   .support,
   .schedule,
+  .coach,
   footer {
     padding-left: 20px;
     padding-right: 20px;
@@ -746,6 +892,14 @@ footer > a:last-child {
 
   .support-grid {
     grid-template-columns: 1fr;
+  }
+
+  .chat-messages {
+    min-height: 360px;
+  }
+
+  .chat-message {
+    max-width: 94%;
   }
 
   .support-grid article + article {

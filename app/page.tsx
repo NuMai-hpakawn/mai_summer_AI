@@ -31,6 +31,11 @@ type TrainingDay = {
   exercises: Exercise[];
 };
 
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
 const initialProfile: Profile = {
   goal: "muscle",
   experience: "beginner",
@@ -277,6 +282,19 @@ function NumberField({
 export default function Home() {
   const [profile, setProfile] = useState(initialProfile);
   const [activeDay, setActiveDay] = useState(0);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      role: "assistant",
+      content:
+        "Hi, I’m Kinetic Coach. Ask me about exercises, your weekly split, recovery, or gym nutrition.",
+    },
+  ]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatError, setChatError] = useState("");
+  const [isChatting, setIsChatting] = useState(false);
+  const chatSessionId = useRef(
+    `kinetic_${crypto.randomUUID().replaceAll("-", "")}`,
+  );
   const plan = useMemo(() => buildPlan(profile), [profile]);
   const selectedDay = plan.days[Math.min(activeDay, plan.days.length - 1)];
   const lastTracedPlan = useRef("");
@@ -342,6 +360,54 @@ export default function Home() {
     if (key === "availableDays" || key === "experience") setActiveDay(0);
   }
 
+  async function sendChatMessage(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const content = chatInput.trim();
+    if (!content || isChatting) return;
+
+    const nextMessages = [
+      ...chatMessages,
+      { role: "user" as const, content },
+    ].slice(-10);
+    setChatMessages(nextMessages);
+    setChatInput("");
+    setChatError("");
+    setIsChatting(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          messages: nextMessages.filter(
+            (message, index) =>
+              index > 0 || message.role === "user",
+          ),
+          sessionId: chatSessionId.current,
+        }),
+      });
+      const payload = (await response.json()) as {
+        message?: string;
+        error?: string;
+      };
+      if (!response.ok || !payload.message) {
+        throw new Error(payload.error ?? "Chat request failed");
+      }
+      setChatMessages((current) => [
+        ...current,
+        { role: "assistant", content: payload.message as string },
+      ]);
+    } catch (error) {
+      setChatError(
+        error instanceof Error
+          ? error.message
+          : "The coach is unavailable. Please try again.",
+      );
+    } finally {
+      setIsChatting(false);
+    }
+  }
+
   return (
     <main>
       <nav className="nav-shell" aria-label="Primary navigation">
@@ -350,6 +416,7 @@ export default function Home() {
         </a>
         <div className="nav-meta">
           <span>Personal training analysis</span>
+          <a href="#coach">Ask coach</a>
           <a href="#planner">Build my week ↓</a>
         </div>
       </nav>
@@ -589,9 +656,65 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="coach" id="coach">
+        <div className="section-heading inverse">
+          <span>03 / Ask the coach</span>
+          <h2>A simple answer when your next step is not obvious.</h2>
+        </div>
+        <div className="chat-shell">
+          <div
+            className="chat-messages"
+            aria-live="polite"
+            aria-label="Conversation with Kinetic Coach"
+          >
+            {chatMessages.map((message, index) => (
+              <div className={`chat-message ${message.role}`} key={index}>
+                <span>{message.role === "assistant" ? "Coach" : "You"}</span>
+                <p>{message.content}</p>
+              </div>
+            ))}
+            {isChatting && (
+              <div className="chat-message assistant waiting">
+                <span>Coach</span>
+                <p>Thinking about your question…</p>
+              </div>
+            )}
+          </div>
+          <form className="chat-form" onSubmit={sendChatMessage}>
+            <label htmlFor="coach-question">Your fitness question</label>
+            <div>
+              <textarea
+                id="coach-question"
+                value={chatInput}
+                onChange={(event) => setChatInput(event.target.value)}
+                placeholder="How should I warm up before leg day?"
+                maxLength={1200}
+                rows={3}
+                disabled={isChatting}
+              />
+              <button
+                type="submit"
+                disabled={isChatting || !chatInput.trim()}
+              >
+                {isChatting ? "Thinking…" : "Ask coach →"}
+              </button>
+            </div>
+            <p className="chat-hint">
+              General fitness guidance only. For pain, injury, or medical
+              concerns, speak with a qualified professional.
+            </p>
+            {chatError && (
+              <p className="chat-error" role="alert">
+                {chatError}
+              </p>
+            )}
+          </form>
+        </div>
+      </section>
+
       <section className="support">
         <div className="section-heading">
-          <span>03 / Support the work</span>
+          <span>04 / Support the work</span>
           <h2>Training is the signal. Recovery is the adaptation.</h2>
         </div>
         <div className="support-grid">

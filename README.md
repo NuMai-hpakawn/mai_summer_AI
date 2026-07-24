@@ -45,3 +45,19 @@ the request finishes so traces are not lost.
 
 If credentials are absent or export fails, tracing degrades safely without
 interrupting the workout planner.
+
+## Fitness chat
+
+The Ask the Coach chat uses OpenRouter through the server-side `/api/chat`
+endpoint. The browser never receives the API key. By default, it uses
+`openrouter/free`; set `OPENROUTER_MODEL` to another OpenRouter model ID if
+needed.
+
+```bash
+OPENROUTER_API_KEY=sk-or-v1-...
+OPENROUTER_MODEL=openrouter/free
+```
+
+Each chat turn is recorded as an `answer-fitness-question` trace containing a
+`generate-fitness-answer` generation with the selected model and token usage.
+Related turns share an anonymous browser-session ID.
