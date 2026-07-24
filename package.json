@@ -14,6 +14,9 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
+    "@langfuse/otel": "5.9.1",
+    "@langfuse/tracing": "5.9.1",
+    "@opentelemetry/sdk-node": "0.221.0",
     "drizzle-orm": "0.45.2",
     "next": "16.2.6",
     "react": "19.2.6",

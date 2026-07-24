@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Goal = "strength" | "muscle" | "fat-loss" | "general";
 type Experience = "beginner" | "intermediate" | "advanced";
@@ -279,6 +279,63 @@ export default function Home() {
   const [activeDay, setActiveDay] = useState(0);
   const plan = useMemo(() => buildPlan(profile), [profile]);
   const selectedDay = plan.days[Math.min(activeDay, plan.days.length - 1)];
+  const lastTracedPlan = useRef("");
+
+  useEffect(() => {
+    const readinessBand =
+      plan.readiness < 60 ? "low" : plan.readiness < 80 ? "moderate" : "high";
+    const tracePayload = {
+      goal: profile.goal,
+      experience: profile.experience,
+      availabilityBand:
+        profile.availableDays <= 3 ? "2-3-days" : "4-5-days",
+      recoveryBand:
+        profile.sleep < 6.5
+          ? "low"
+          : profile.sleep < 8
+            ? "moderate"
+            : "high",
+      nutritionBand:
+        profile.proteinMeals < 2
+          ? "low"
+          : profile.proteinMeals < 4
+            ? "moderate"
+            : "high",
+      movementBand:
+        profile.steps < 5000
+          ? "low"
+          : profile.steps < 9000
+            ? "moderate"
+            : "high",
+      recommendation: {
+        trainingDays: plan.recommendedDays,
+        split: plan.days.map((day) => day.focus).join(" / "),
+        readinessBand,
+        cardioFocus: profile.goal === "fat-loss" ? "fat-loss" : "standard",
+      },
+    };
+    const fingerprint = JSON.stringify(tracePayload);
+    if (fingerprint === lastTracedPlan.current) return;
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => {
+      lastTracedPlan.current = fingerprint;
+      void fetch("/api/trace-plan", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: fingerprint,
+        signal: controller.signal,
+        keepalive: true,
+      }).catch(() => {
+        // Observability must never interrupt the workout planning experience.
+      });
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [plan, profile]);
 
   function update<K extends keyof Profile>(key: K, value: Profile[K]) {
     setProfile((current) => ({ ...current, [key]: value }));
